@@ -1,0 +1,66 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Dependencies (built in Docker)
+node_modules
+vendor
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Build artifacts
+dist
+build
+npm-debug.log*
+
+# Laravel specific
+storage/logs/*
+storage/framework/cache/*
+storage/framework/sessions/*
+bootstrap/cache/*
+database/*.sqlite-wal
+database/*.sqlite-shm
+
+# OS
+Thumbs.db
+.AppleDouble
+.LSOverride
+
+# Test files and coverage
+tests/
+coverage
+.phpunit.result.cache
+phpunit.result.cache
+
+# Documentation
+CHANGELOG.md
+CONTRIBUTING.md
+DUMMY_DATA.md
+NOTIFICATIONS.md
+
+# CI/CD
+.github
+.gitlab-ci.yml
+.travis.yml
+
+# Archives
+*.zip
+*.tar.gz
+*.rar
+
+# Temporary files
+*.tmp
+*.temp
+.tmp
