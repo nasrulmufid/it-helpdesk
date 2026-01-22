@@ -14,12 +14,21 @@ check_db() {
     DB_CONNECTION=${DB_CONNECTION:-sqlite}
     
     if [ "$DB_CONNECTION" = "sqlite" ]; then
-        # For SQLite, just check if we can access the database file or create it
-        DB_PATH=${DB_DATABASE:-database.sqlite}
-        if [ ! -f "$DB_PATH" ]; then
-            echo "SQLite database file will be created during migration"
+        # For SQLite, ensure the file exists
+        DB_PATH=${DB_DATABASE:-database/database.sqlite}
+        
+        # If the path is relative, prefix it with the app path
+        if [[ ! "$DB_PATH" == /* ]]; then
+            DB_PATH="/var/www/html/$DB_PATH"
         fi
-        echo "SQLite database ready"
+
+        if [ ! -f "$DB_PATH" ]; then
+            echo "Creating SQLite database file at $DB_PATH..."
+            touch "$DB_PATH"
+        fi
+        chown www-data:www-data "$DB_PATH"
+        chmod 664 "$DB_PATH"
+        echo "SQLite database ready at $DB_PATH"
         return 0
     else
         # Original MySQL check
