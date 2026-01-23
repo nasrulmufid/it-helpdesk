@@ -39,6 +39,16 @@ class TicketController extends Controller
             $query->where('assigned_to', $request->assigned_to);
         }
 
+        if ($request->filled('q')) {
+            $search = trim((string) $request->q);
+            $query->where(function ($q) use ($search) {
+                $q->where('ticket_number', 'like', '%' . $search . '%')
+                    ->orWhereHas('user', function ($userQuery) use ($search) {
+                        $userQuery->where('name', 'like', '%' . $search . '%');
+                    });
+            });
+        }
+
         // User-specific filtering
         if ($user->isUser()) {
             $query->where('user_id', $user->id);
