@@ -2,15 +2,18 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\User;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
 class AdminMiddleware
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if (!auth()->check() || (!auth()->user()->isAdmin() && !auth()->user()->isGeneralManager())) {
+        $user = Auth::user();
+        if (!$user instanceof User || (!$user->isAdmin() && !$user->isGeneralManager())) {
             abort(403, 'Unauthorized access');
         }
 

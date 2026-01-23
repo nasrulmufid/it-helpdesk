@@ -2,9 +2,10 @@
 
 namespace App\Notifications;
 
+use App\Models\User;
 use Illuminate\Bus\Queueable;
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Facades\Auth;
 
 class TicketActivityNotification extends Notification
 {
@@ -24,6 +25,10 @@ class TicketActivityNotification extends Notification
 
     public function toArray(object $notifiable): array
     {
+        $user = Auth::user();
+        $byUserId = $user instanceof User ? $user->id : null;
+        $byUserName = $user instanceof User ? $user->name : null;
+
         return [
             'type' => $this->details['type'] ?? 'ticket_activity',
             'title' => $this->details['title'] ?? 'Tiket',
@@ -31,8 +36,8 @@ class TicketActivityNotification extends Notification
             'ticket_id' => $this->details['ticket_id'] ?? null,
             'ticket_number' => $this->details['ticket_number'] ?? null,
             'url' => $this->details['url'] ?? null,
-            'by_user_id' => $this->details['by_user_id'] ?? auth()->id(),
-            'by_user_name' => $this->details['by_user_name'] ?? auth()->user()?->name,
+            'by_user_id' => $this->details['by_user_id'] ?? $byUserId,
+            'by_user_name' => $this->details['by_user_name'] ?? $byUserName,
         ];
     }
 }

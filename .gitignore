@@ -3,8 +3,12 @@
 /public/build
 /public/hot
 /public/storage
+/storage
 /storage/*.key
 /vendor
+/database.sqlite
+/database/*.sqlite
+.trae
 .env
 .env.backup
 .env.production
