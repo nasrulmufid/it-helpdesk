@@ -14,15 +14,6 @@ check_db() {
     DB_CONNECTION=${DB_CONNECTION:-sqlite}
     
     if [ "$DB_CONNECTION" = "sqlite" ]; then
-<<<<<<< HEAD
-        # For SQLite, ensure the file exists
-        DB_PATH=${DB_DATABASE:-database/database.sqlite}
-        
-        # If the path is relative, prefix it with the app path
-        if [[ ! "$DB_PATH" == /* ]]; then
-            DB_PATH="/var/www/html/$DB_PATH"
-=======
-        # For SQLite, just check if we can access the database file or create it
         DB_PATH=${DB_DATABASE:-database/database.sqlite}
         if [[ "$DB_PATH" != /* ]]; then
             DB_PATH="/var/www/html/$DB_PATH"
@@ -35,29 +26,39 @@ check_db() {
         chown www-data:www-data "$DB_PATH" 2>/dev/null || true
         if [ ! -f "$DB_PATH" ]; then
             echo "SQLite database file will be created during migration"
->>>>>>> 6fc926c (Fix Docker SQLite sessions and unique ticket numbers)
         fi
-
-        if [ ! -f "$DB_PATH" ]; then
-            echo "Creating SQLite database file at $DB_PATH..."
-            touch "$DB_PATH"
-        fi
-        chown www-data:www-data "$DB_PATH"
-        chmod 664 "$DB_PATH"
-        echo "SQLite database ready at $DB_PATH"
+        echo "SQLite database ready"
         return 0
     else
-        # MySQL check
+        # Original MySQL check
         php -r "
         try {
             \$host = getenv('DB_HOST') ?: 'db';
             \$port = getenv('DB_PORT') ?: '3306';
             \$database = getenv('DB_DATABASE') ?: 'it_helpdesk';
-            \$username = getenv('DB_USERNAME') ?: 'it_helpdesk_user';
-            \$password = getenv('DB_PASSWORD') ?: 'it_helpdesk_pass';
+            \$username = getenv('DB_USERNAME') ?: 'root';
+            \$password = getenv('DB_PASSWORD') ?: 'password';
 
+            // First try to connect to mysql database to check if MySQL is running
             \$pdo = new PDO(
-                \"mysql:host=\$host;port=\$port;dbname=\$database;charset=utf8mb4\",
+                \"mysql:host=\$host;port=\$port;dbname=mysql\",
+                \$username,
+                \$password,
+                [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_TIMEOUT => 5]
+            );
+
+            // Check if application database exists
+            \$stmt = \$pdo->query(\"SHOW DATABASES LIKE '\$database'\");
+            \$exists = \$stmt->fetch();
+
+            if (!\$exists) {
+                echo \"Creating database \$database...\\n\";
+                \$pdo->exec(\"CREATE DATABASE IF NOT EXISTS \$database CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci\");
+            }
+
+            // Now try to connect to the application database
+            \$pdo = new PDO(
+                \"mysql:host=\$host;port=\$port;dbname=\$database\",
                 \$username,
                 \$password,
                 [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_TIMEOUT => 5]
