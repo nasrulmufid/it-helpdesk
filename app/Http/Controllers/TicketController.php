@@ -65,10 +65,9 @@ class TicketController extends Controller
         ]);
 
         $validated['user_id'] = auth()->id();
-        $validated['ticket_number'] = Ticket::generateTicketNumber();
         $validated['status'] = 'open';
 
-        $ticket = Ticket::create($validated);
+        $ticket = Ticket::createWithUniqueTicketNumber($validated);
 
         // Notify admins, general managers, and technicians about new ticket
         $recipients = User::whereIn('role', ['admin', 'general_manager', 'technician'])->get();

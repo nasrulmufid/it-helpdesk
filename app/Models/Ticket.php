@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Str;
 
 class Ticket extends Model
 {
@@ -106,17 +108,53 @@ class Ticket extends Model
     public static function generateTicketNumber()
     {
         $prefix = 'TKT';
-        $date = date('Ymd');
-        $lastTicket = self::whereDate('created_at', today())->latest()->first();
+        $date = now()->format('Ymd');
+        $prefixWithDate = $prefix . $date;
 
-        if ($lastTicket) {
-            $lastNumber = intval(substr($lastTicket->ticket_number, -4));
-            $newNumber = str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
-        } else {
-            $newNumber = '0001';
+        $lastTicketNumber = self::where('ticket_number', 'like', $prefixWithDate . '%')->max('ticket_number');
+
+        $nextSequence = 1;
+        if (is_string($lastTicketNumber) && Str::startsWith($lastTicketNumber, $prefixWithDate) && strlen($lastTicketNumber) >= strlen($prefixWithDate) + 4) {
+            $lastSequence = (int) substr($lastTicketNumber, -4);
+            $nextSequence = max(1, $lastSequence + 1);
         }
 
-        return $prefix . $date . $newNumber;
+        return $prefixWithDate . str_pad((string) $nextSequence, 4, '0', STR_PAD_LEFT);
+    }
+
+    public static function createWithUniqueTicketNumber(array $attributes, int $maxAttempts = 10): self
+    {
+        for ($attempt = 1; $attempt <= $maxAttempts; $attempt++) {
+            if (empty($attributes['ticket_number'])) {
+                $attributes['ticket_number'] = self::generateTicketNumber();
+            }
+
+            try {
+                return self::create($attributes);
+            } catch (QueryException $e) {
+                if ($attempt === $maxAttempts || !self::isTicketNumberUniqueViolation($e)) {
+                    throw $e;
+                }
+                unset($attributes['ticket_number']);
+            }
+        }
+
+        return self::create($attributes);
+    }
+
+    private static function isTicketNumberUniqueViolation(QueryException $e): bool
+    {
+        $message = $e->getMessage();
+        if (is_string($message) && str_contains($message, 'tickets.ticket_number')) {
+            return true;
+        }
+
+        $sqlState = $e->errorInfo[0] ?? null;
+        if ($sqlState === '23000') {
+            return true;
+        }
+
+        return false;
     }
 
     public function getPriorityLabelAttribute()

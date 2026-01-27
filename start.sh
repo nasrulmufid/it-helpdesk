@@ -15,7 +15,16 @@ check_db() {
     
     if [ "$DB_CONNECTION" = "sqlite" ]; then
         # For SQLite, just check if we can access the database file or create it
-        DB_PATH=${DB_DATABASE:-database.sqlite}
+        DB_PATH=${DB_DATABASE:-database/database.sqlite}
+        if [[ "$DB_PATH" != /* ]]; then
+            DB_PATH="/var/www/html/$DB_PATH"
+        fi
+        export RESOLVED_SQLITE_DB_PATH="$DB_PATH"
+        mkdir -p "$(dirname "$DB_PATH")"
+        if [ ! -f "$DB_PATH" ]; then
+            touch "$DB_PATH" 2>/dev/null || true
+        fi
+        chown www-data:www-data "$DB_PATH" 2>/dev/null || true
         if [ ! -f "$DB_PATH" ]; then
             echo "SQLite database file will be created during migration"
         fi
@@ -85,27 +94,27 @@ if [ -z "$APP_KEY" ]; then
     php artisan key:generate --force
 fi
 
+php artisan config:clear >/dev/null 2>&1 || true
+
 # Run database migrations if database is ready
 if [ $DB_READY -eq 1 ]; then
     echo "Running database migrations..."
-
-    # Check if migrations are already run
-    MIGRATION_STATUS=$(php artisan migrate:status --no-ansi 2>/dev/null | grep -c "Ran" || echo "0")
-
-    if [ "$MIGRATION_STATUS" -eq "0" ]; then
-        echo "No migrations found, running fresh migrations..."
-        if php artisan migrate --force; then
-            echo "Migrations completed successfully"
-        else
-            echo "ERROR: Migrations failed!"
+    if php artisan migrate --force; then
+        echo "Migrations completed successfully"
+    else
+        echo "ERROR: Migrations failed!"
+        exit 1
+    fi
+    if [ -n "$RESOLVED_SQLITE_DB_PATH" ] && command -v sqlite3 >/dev/null 2>&1; then
+        SESSION_TABLE=$(sqlite3 "$RESOLVED_SQLITE_DB_PATH" "SELECT name FROM sqlite_master WHERE type='table' AND name='sessions';" 2>/dev/null || true)
+        if [ "$SESSION_TABLE" != "sessions" ]; then
+            echo "ERROR: sessions table not found in SQLite database ($RESOLVED_SQLITE_DB_PATH)"
             exit 1
         fi
-    else
-        echo "Migrations already run, skipping..."
     fi
 
     # Check if database is seeded
-    USER_COUNT=$(php artisan tinker --execute="echo App\\\Models\\\User::count();" 2>/dev/null || echo "0")
+    USER_COUNT=$(php artisan tinker --execute="echo App\\Models\\User::count();" 2>/dev/null || echo "0")
 
     if [ "$USER_COUNT" = "0" ]; then
         echo "Seeding database..."

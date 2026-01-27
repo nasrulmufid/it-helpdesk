@@ -12,7 +12,7 @@ services:
       - APP_DEBUG=false
       - APP_KEY=base64:FvfeVzMM9iYe0KxLCfHh6nqNUPsC7XDpqm8N1/y4/9U=
       - DB_CONNECTION=sqlite
-      - DB_DATABASE=database.sqlite
+      - DB_DATABASE=/var/www/html/database/database.sqlite
     volumes:
       - ./database:/var/www/html/database
       - ./storage:/var/www/html/storage

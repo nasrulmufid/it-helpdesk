@@ -62,7 +62,7 @@ RUN a2enmod rewrite
 
 # Copy and setup startup script
 COPY start.sh /usr/local/bin/start.sh
-RUN chmod +x /usr/local/bin/start.sh
+RUN sed -i 's/\r$//' /usr/local/bin/start.sh && chmod +x /usr/local/bin/start.sh
 
 # Expose port 80
 EXPOSE 80
