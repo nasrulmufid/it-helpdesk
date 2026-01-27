@@ -2,7 +2,10 @@ name: Build and Push Docker Image
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main, master, v3.0, v3.1 ]
+    tags:
+      - 'v*'
+      - 'latest'
   pull_request:
     branches: [ main, master ]
 
@@ -30,9 +33,9 @@ jobs:
         images: nasrulmufid/it-help-desk
         tags: |
           type=ref,event=branch
+          type=ref,event=tag
           type=ref,event=pr
           type=sha,prefix={{branch}}-
-          type=raw,value=v3.0,enable={{is_default_branch}}
           type=raw,value=latest,enable={{is_default_branch}}
 
     - name: Build and push Docker image
