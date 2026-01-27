@@ -23,9 +23,11 @@ docker compose --env-file .env.docker up -d --build
 - phpMyAdmin: `http://localhost:8081` (ubah lewat `PHPMYADMIN_PORT` di `.env.docker`)
 
 5. Login phpMyAdmin:
-- Server: `db`
-- Username: sesuai `MYSQL_USER`
-- Password: sesuai `MYSQL_PASSWORD`
+- Secara default server sudah dikunci ke `db` (bukan `localhost`), jadi cukup login dengan:
+  - Username: sesuai `MYSQL_USER`
+  - Password: sesuai `MYSQL_PASSWORD`
+
+Jika sebelumnya Anda mengisi Server = `localhost` dan muncul error `HY000/2002 (No such file or directory)`, itu karena phpMyAdmin mencoba konek via MySQL socket (bukan TCP). Gunakan host `db` (service name di Docker network) atau biarkan konfigurasi default.
 
 ### 1. Install Dependencies
 

@@ -62,7 +62,9 @@ services:
     environment:
       PMA_HOST: db
       PMA_PORT: 3306
-      PMA_ARBITRARY: 1
+      PMA_USER: ${MYSQL_USER:-it_helpdesk_user}
+      PMA_PASSWORD: ${MYSQL_PASSWORD:-it_helpdesk_pass}
+      PMA_ARBITRARY: 0
     depends_on:
       db:
         condition: service_healthy
