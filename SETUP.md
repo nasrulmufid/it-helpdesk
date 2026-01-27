@@ -2,6 +2,31 @@
 
 ## Langkah-langkah Instalasi
 
+## Jalankan Dengan Docker Compose (MySQL + phpMyAdmin)
+
+1. Salin file environment Docker:
+
+```powershell
+Copy-Item .env.docker.example .env.docker
+```
+
+2. (Opsional) Isi `APP_KEY` di `.env.docker`. Jika dibiarkan kosong, container akan generate otomatis saat start.
+
+3. Jalankan semua service:
+
+```powershell
+docker compose --env-file .env.docker up -d --build
+```
+
+4. Akses layanan:
+- Aplikasi: `http://localhost:8010` (ubah lewat `APP_PORT` di `.env.docker`)
+- phpMyAdmin: `http://localhost:8081` (ubah lewat `PHPMYADMIN_PORT` di `.env.docker`)
+
+5. Login phpMyAdmin:
+- Server: `db`
+- Username: sesuai `MYSQL_USER`
+- Password: sesuai `MYSQL_PASSWORD`
+
 ### 1. Install Dependencies
 
 Buka terminal PowerShell di folder project, lalu jalankan:
