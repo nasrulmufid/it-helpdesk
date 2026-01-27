@@ -5,6 +5,7 @@
 /public/storage
 /storage
 /storage/*.key
+/storage/framework/testing/
 /vendor
 /database.sqlite
 /database/*.sqlite

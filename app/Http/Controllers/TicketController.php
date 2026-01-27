@@ -90,14 +90,13 @@ class TicketController extends Controller
         ]);
 
         $validated['user_id'] = $user->id;
-        $validated['ticket_number'] = Ticket::generateTicketNumber();
         $validated['status'] = 'open';
 
         $storedPaths = [];
 
         DB::beginTransaction();
         try {
-            $ticket = Ticket::create($validated);
+            $ticket = Ticket::createWithUniqueTicketNumber($validated);
 
             foreach ((array) $request->file('attachments', []) as $file) {
                 $directory = 'ticket-attachments/' . $ticket->id;

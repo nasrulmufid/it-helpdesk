@@ -202,39 +202,67 @@ class DataMigrationController extends Controller
 
     private function importTicket($row, $rowNumber)
     {
-        if (count($row) < 7) {
+        $columnCount = count($row);
+        $isExportFormat = $columnCount >= 9;
+
+        if (!$isExportFormat && $columnCount < 7) {
             throw new \Exception("Format kolom tidak sesuai. Harusnya: title, description, user_email, category_name, priority, status, assigned_to_email");
         }
 
-        $user = User::where('email', $row[2])->first();
-        if (!$user) {
-            throw new \Exception("User dengan email {$row[2]} tidak ditemukan");
+        $ticketNumberFromCsv = null;
+        if ($isExportFormat) {
+            $ticketNumberFromCsv = trim((string) $row[0]);
+            $title = $row[1];
+            $description = $row[2];
+            $userEmail = $row[3];
+            $categoryName = $row[4];
+            $priority = $row[5];
+            $status = $row[6];
+            $assignedToEmail = $row[7] ?? null;
+        } else {
+            $title = $row[0];
+            $description = $row[1];
+            $userEmail = $row[2];
+            $categoryName = $row[3];
+            $priority = $row[4];
+            $status = $row[5];
+            $assignedToEmail = $row[6] ?? null;
         }
 
-        $category = Category::where('name', $row[3])->first();
+        $user = User::where('email', $userEmail)->first();
+        if (!$user) {
+            throw new \Exception("User dengan email {$userEmail} tidak ditemukan");
+        }
+
+        $category = Category::where('name', $categoryName)->first();
         if (!$category) {
             // Try to find by slug or create? Let's throw error for strictness
-             throw new \Exception("Kategori '{$row[3]}' tidak ditemukan");
+             throw new \Exception("Kategori '{$categoryName}' tidak ditemukan");
         }
 
         $assignedTo = null;
-        if (!empty($row[6])) {
-            $assignedUser = User::where('email', $row[6])->first();
+        if (!empty($assignedToEmail)) {
+            $assignedUser = User::where('email', $assignedToEmail)->first();
             if ($assignedUser) {
                 $assignedTo = $assignedUser->id;
             }
         }
 
-        Ticket::create([
-            'ticket_number' => Ticket::generateTicketNumber(),
-            'title' => $row[0],
-            'description' => $row[1],
+        $attributes = [
+            'title' => $title,
+            'description' => $description,
             'user_id' => $user->id,
             'category_id' => $category->id,
-            'priority' => $this->validatePriority($row[4]),
-            'status' => $this->validateStatus($row[5]),
+            'priority' => $this->validatePriority($priority),
+            'status' => $this->validateStatus($status),
             'assigned_to' => $assignedTo,
-        ]);
+        ];
+
+        if (!empty($ticketNumberFromCsv) && !Ticket::where('ticket_number', $ticketNumberFromCsv)->exists()) {
+            $attributes['ticket_number'] = $ticketNumberFromCsv;
+        }
+
+        Ticket::createWithUniqueTicketNumber($attributes);
     }
 
     private function validateRole($role)
