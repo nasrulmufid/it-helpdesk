@@ -47,35 +47,17 @@ check_db() {
         echo "SQLite database ready at $DB_PATH"
         return 0
     else
-        # Original MySQL check
+        # MySQL check
         php -r "
         try {
             \$host = getenv('DB_HOST') ?: 'db';
             \$port = getenv('DB_PORT') ?: '3306';
             \$database = getenv('DB_DATABASE') ?: 'it_helpdesk';
-            \$username = getenv('DB_USERNAME') ?: 'root';
-            \$password = getenv('DB_PASSWORD') ?: 'password';
+            \$username = getenv('DB_USERNAME') ?: 'it_helpdesk_user';
+            \$password = getenv('DB_PASSWORD') ?: 'it_helpdesk_pass';
 
-            // First try to connect to mysql database to check if MySQL is running
             \$pdo = new PDO(
-                \"mysql:host=\$host;port=\$port;dbname=mysql\",
-                \$username,
-                \$password,
-                [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_TIMEOUT => 5]
-            );
-
-            // Check if application database exists
-            \$stmt = \$pdo->query(\"SHOW DATABASES LIKE '\$database'\");
-            \$exists = \$stmt->fetch();
-
-            if (!\$exists) {
-                echo \"Creating database \$database...\\n\";
-                \$pdo->exec(\"CREATE DATABASE IF NOT EXISTS \$database CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci\");
-            }
-
-            // Now try to connect to the application database
-            \$pdo = new PDO(
-                \"mysql:host=\$host;port=\$port;dbname=\$database\",
+                \"mysql:host=\$host;port=\$port;dbname=\$database;charset=utf8mb4\",
                 \$username,
                 \$password,
                 [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_TIMEOUT => 5]
