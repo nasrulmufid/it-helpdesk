@@ -6,7 +6,7 @@ services:
     image: nasrulmufid/it-help-desk:latest
     container_name: it-help-desk-app
     ports:
-      - "8000:80"
+      - "8010:80"
     environment:
       - APP_ENV=production
       - APP_DEBUG=false
