@@ -23,15 +23,20 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
-/.trae
-\IMPLEMENTATION_SUMMARY.md\
-\FINAL_DEPLOYMENT_GUIDE.md\
-\GITHUB_FILES_SELECTION.md\
-\scripts/create-tag-v5.sh\
-\scripts/create-tag-v5.ps1\
-\FINAL_DEPLOYMENT_GUIDE.md\
-\GITHUB_PUBLIC_FILES_SUMMARY.md\
-\GITHUB_REPOSITORY_OVERVIEW.md\
-\IMPLEMENTATION_SUMMARY.md\
-\NOTIFICATIONS.md\
-\PRESENTATION.md\
+
+# Internal Documentation
+IMPLEMENTATION_SUMMARY.md
+FINAL_DEPLOYMENT_GUIDE.md
+GITHUB_FILES_SELECTION.md
+GITHUB_PUBLIC_FILES_SUMMARY.md
+GITHUB_REPOSITORY_OVERVIEW.md
+NOTIFICATIONS.md
+PRESENTATION.md
+DUMMY_DATA.md
+SETUP.md
+DOCKER_HUB_MULTI_README.md
+
+# Internal Scripts
+scripts/create-tag-v5.sh
+scripts/create-tag-v5.ps1
+scripts/create-tag-v5.ps1
