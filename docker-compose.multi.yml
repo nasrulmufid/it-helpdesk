@@ -6,10 +6,7 @@ version: '3.8'
 
 services:
   it-help-desk-multi:
-    build:
-      context: .
-      dockerfile: Dockerfile.multi
-    image: it-help-desk-multi:latest
+    image: ghcr.io/nasrulmufid/it-help-desk/it-help-desk-multi:v5.0
     container_name: it-help-desk-multi-dev
     ports:
       - "${APP_PORT:-8080}:80"
