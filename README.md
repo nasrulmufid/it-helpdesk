@@ -72,15 +72,36 @@ Ini adalah cara termudah dan paling stabil untuk menjalankan IT Help Desk v2.2.0
 
 ---
 
-## 👥 Default Test Accounts
+## 🐳 Docker Deployment
 
-| Email | Password | Role |
-|-------|----------|------|
-| admin@helpdesk.com | password | Admin |
-| tech1@helpdesk.com | password | Technician |
-| user@helpdesk.com | password | User |
+### Opsi 1: Multi-Service (Recommended)
+Menggunakan Docker Compose untuk memisahkan aplikasi, database, dan phpMyAdmin.
+```bash
+docker-compose up -d
+```
 
-> ⚠️ Segera ganti password default di lingkungan produksi!
+### Opsi 2: Monolithic Image (All-in-One)
+Satu container yang berisi Apache, PHP, MySQL, dan phpMyAdmin. Cocok untuk testing cepat.
+```bash
+# Build monolithic image
+docker build -t it-helpdesk-monolithic -f Dockerfile.monolithic .
+
+# Jalankan container
+docker run -d -p 8000:80 -p 3306:3306 --name it-helpdesk-monolithic it-helpdesk-monolithic
+```
+
+---
+
+## 🏗️ CI/CD Pipeline
+
+Proyek ini menggunakan **GitHub Actions** untuk otomatisasi build dan deployment:
+1. **Trigger**: Setiap `push` ke branch `main` atau `master`, serta pembuatan `tag` rilis (v*).
+2. **Stages**:
+   - **Test**: Menjalankan unit testing Laravel.
+   - **Build**: Membangun Docker image monolithic berbasis Ubuntu 22.04.
+   - **Push**: Mengunggah image ke Docker Hub (`nasrulmufid/it-help-desk-monolithic`).
+3. **Caching**: Menggunakan GitHub Actions cache untuk mempercepat build berulang.
+4. **Tagging**: Otomatis menggunakan Semantic Versioning (SemVer) dan commit hash.
 
 ---
 
