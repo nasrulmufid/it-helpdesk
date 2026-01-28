@@ -24,3 +24,8 @@ yarn-error.log
 /.idea
 /.vscode
 /.trae
+\IMPLEMENTATION_SUMMARY.md\
+\FINAL_DEPLOYMENT_GUIDE.md\
+\GITHUB_FILES_SELECTION.md\
+\scripts/create-tag-v5.sh\
+\scripts/create-tag-v5.ps1\
