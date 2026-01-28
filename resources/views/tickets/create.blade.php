@@ -12,7 +12,7 @@
 <!-- Form Card -->
 <div class="max-w-3xl">
     <div class="bg-gray-800 rounded-xl border border-gray-700 p-8">
-        <form method="POST" action="{{ route('tickets.store') }}" enctype="multipart/form-data">
+        <form method="POST" action="{{ route('tickets.store') }}">
             @csrf
             
             <!-- Title -->
@@ -136,28 +136,6 @@
                 >{{ old('description') }}</textarea>
                 <p class="mt-2 text-sm text-gray-400">Berikan informasi sebanyak mungkin agar kami bisa membantu dengan lebih cepat</p>
                 @error('description')
-                    <p class="mt-2 text-sm text-red-400">{{ $message }}</p>
-                @enderror
-            </div>
-
-            <!-- Attachments -->
-            <div class="mb-8">
-                <label for="attachments" class="block text-sm font-medium text-gray-300 mb-2">
-                    Lampiran (Foto/Dokumen) <span class="text-red-400">*</span>
-                </label>
-                <input
-                    type="file"
-                    id="attachments"
-                    name="attachments[]"
-                    multiple
-                    class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
-                    required
-                >
-                <p class="mt-2 text-sm text-gray-400">Unggah minimal 1 file (contoh: foto, PDF, DOC/DOCX, XLS/XLSX).</p>
-                @error('attachments')
-                    <p class="mt-2 text-sm text-red-400">{{ $message }}</p>
-                @enderror
-                @error('attachments.*')
                     <p class="mt-2 text-sm text-red-400">{{ $message }}</p>
                 @enderror
             </div>

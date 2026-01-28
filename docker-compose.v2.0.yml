@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    image: nasrulmufid/it-help-desk:latest
+    container_name: it-help-desk-app
+    ports:
+      - "8000:80"
+    environment:
+      - APP_ENV=production
+      - APP_DEBUG=false
+      - APP_KEY=base64:FvfeVzMM9iYe0KxLCfHh6nqNUPsC7XDpqm8N1/y4/9U=
+      - DB_CONNECTION=sqlite
+      - DB_DATABASE=/var/www/html/database/database.sqlite
+    volumes:
+      - ./database:/var/www/html/database
+      - ./storage:/var/www/html/storage
+      - ./bootstrap/cache:/var/www/html/bootstrap/cache
+    networks:
+      - it-helpdesk
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost/" ]
+      timeout: 10s
+      retries: 3
+      interval: 10s
+      start_period: 30s
+
+networks:
+  it-helpdesk:
+    driver: bridge

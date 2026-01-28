@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Category;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
@@ -72,7 +71,7 @@ class AdminController extends Controller
 
     public function destroyUser(User $user)
     {
-        if ($user->id === Auth::id()) {
+        if ($user->id === auth()->id()) {
             return back()->with('error', 'Anda tidak dapat menghapus akun sendiri!');
         }
 

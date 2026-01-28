@@ -1,7 +1,8 @@
 # 🚀 IT Help Desk - Ticketing System
 
-**Version**: 5.0 (January 2026)  
+**Version**: 2.2.0 (January 2026)  
 **Status**: Production Ready  
+**Architecture**: Docker Multi-Service (App, MySQL, phpMyAdmin)  
 **Framework**: Laravel 11  
 **PHP Version**: 8.2+  
 
@@ -9,18 +10,29 @@
 
 ## 📦 Project Overview
 
-IT Help Desk adalah sistem ticketing dukungan IT yang dibangun dengan Laravel 11. Aplikasi ini dirancang untuk mengelola permintaan dukungan teknis dengan fitur manajemen tiket lengkap, komunikasi real-time, dan dashboard analitik.
+IT Help Desk adalah sistem ticketing dukungan IT yang modern dan efisien. Versi v2.2.0 menghadirkan peningkatan signifikan dengan arsitektur **Multi-Service Docker**, migrasi ke **MySQL 8.0**, dan integrasi **phpMyAdmin** untuk manajemen database yang lebih baik.
 
 ---
 
-## ✨ Core Features
+## ✨ Fitur Baru v2.2.0
+
+- **🐳 Multi-Service Architecture**: Orchestration menggunakan Docker Compose dengan 3 layanan terpisah.
+- **🗄️ MySQL 8.0 Integration**: Performa database yang lebih tangguh menggantikan SQLite.
+- **🛠️ phpMyAdmin Integrated**: Interface web untuk manajemen database langsung dari container.
+- **🏥 Service Health Checks**: Monitoring otomatis kesehatan layanan aplikasi dan database.
+- **💾 Persistent Volumes**: Data database dan storage tetap aman meskipun container di-restart.
+- **🚀 Optimized Dockerfile**: Image yang lebih kecil dan proses build yang lebih cepat.
+
+---
+
+## 🔐 Core Features
 
 ### 🔐 Authentication & Role Management
 ```
 3 User Roles:
-├── Admin → Full system access
-├── Technician → Ticket management & support
-└── User → Create & manage own tickets
+├── Admin → Full system access & configurations
+├── Technician → Ticket management & support responses
+└── User → Create, track & manage own tickets
 ```
 
 ### 🎫 Ticket Management System
@@ -32,107 +44,35 @@ Attributes:
 ├── Categories: Hardware, Software, Network, Email, Database, Security, Account, Other
 ├── Priority: Low, Medium, High, Critical
 ├── Status: Open, In Progress, Resolved, Closed
-├── Attachments: Support file uploads
-└── Responses: Communication channel
-```
-
-### 📊 Reporting & Analytics
-- User dashboard
-- Technician workload
-- Admin statistics
-- Ticket metrics
-
----
-
-## 🚀 Quick Start Options
-
-### 🐳 NEW: Multi-Service Docker (Recommended - Single Container)
-
-**All-in-one container dengan Laravel, MySQL, dan phpMyAdmin!**
-
-```bash
-# Gunakan image dari GitHub Container Registry
-docker run -d -p 80:80 --name it-help-desk-multi \
-  -e APP_KEY=base64:$(openssl rand -base64 32) \
-  -e MYSQL_ROOT_PASSWORD=your_secure_root_password \
-  -e DB_PASSWORD=your_secure_db_password \
-  ghcr.io/nasrulmufid/it-help-desk/it-help-desk-multi:v5.0
-
-# Akses aplikasi
-# - Aplikasi: http://localhost
-# - phpMyAdmin: http://localhost/phpmyadmin
-```
-
-**Dengan Docker Compose:**
-```bash
-# Clone repository
-git clone https://github.com/nasrulmufid/it-help-desk.git
-cd it-help-desk
-
-# Jalankan dengan docker-compose
-docker-compose -f docker-compose.multi.yml up -d
-
-# Akses aplikasi di http://localhost:8080
-```
-
-### 🐳 Docker Standar (Multi-Container)
-```bash
-# Start application
-docker-compose up -d
-
-# Access at: http://localhost:8000
-```
-
-### 💻 Local Development
-```bash
-# Install dependencies
-composer install && npm install
-
-# Setup database
-php artisan migrate:fresh --seed
-
-# Build & run
-npm run build
-php artisan serve
+├── Attachments: Support file uploads (Images, Docs)
+└── Responses: Real-time communication channel
 ```
 
 ---
 
-## � Multi-Service Container Configuration
+## � Quick Start (Recommended)
 
-### Environment Variables
-```bash
-# Application
-APP_NAME="IT Help Desk"
-APP_KEY=base64:YOUR_APP_KEY_HERE  # Wajib diisi!
-APP_ENV=production
-APP_DEBUG=false
+### 🐳 Docker Deployment
+Ini adalah cara termudah dan paling stabil untuk menjalankan IT Help Desk v2.2.0.
 
-# Database (MySQL)
-DB_CONNECTION=mysql
-DB_HOST=localhost
-DB_PORT=3306
-DB_DATABASE=it_helpdesk
-DB_USERNAME=it_helpdesk_user
-DB_PASSWORD=your_secure_password
+1. **Persiapkan Environment**:
+   ```bash
+   cp .env.docker .env
+   ```
 
-# MySQL Root (untuk inisialisasi)
-MYSQL_ROOT_PASSWORD=your_secure_root_password
-```
+2. **Jalankan Layanan**:
+   ```bash
+   docker-compose up -d
+   ```
 
-### Default Access
-- **Aplikasi**: http://localhost
-- **phpMyAdmin**: http://localhost/phpmyadmin
-- **MySQL Port**: 3306 (opsional)
-
-### Default Credentials
-- **MySQL Root**: `root_password` (ubah via environment variable)
-- **Application DB**: `it_helpdesk_user` / `it_helpdesk_pass`
-- **phpMyAdmin**: Gunakan kredensial MySQL di atas
+3. **Akses Layanan**:
+   - **Aplikasi**: [http://localhost:8000](http://localhost:8000)
+   - **phpMyAdmin**: [http://localhost:8080](http://localhost:8080)
+   - **MySQL Host**: `localhost:3306` (Internal: `mysql`)
 
 ---
 
-## �👥 Default Test Accounts
+## 👥 Default Test Accounts
 
 | Email | Password | Role |
 |-------|----------|------|
@@ -140,7 +80,7 @@ MYSQL_ROOT_PASSWORD=your_secure_root_password
 | tech1@helpdesk.com | password | Technician |
 | user@helpdesk.com | password | User |
 
-> ⚠️ Change in production!
+> ⚠️ Segera ganti password default di lingkungan produksi!
 
 ---
 
@@ -148,15 +88,13 @@ MYSQL_ROOT_PASSWORD=your_secure_root_password
 
 | Layer | Technology | Version |
 |-------|-----------|---------|
-| **Backend Framework** | Laravel | 11 |
-| **Language** | PHP | 8.2+ |
-| **Database** | MySQL | 8.0 |
+| **Backend Framework** | Laravel | 11.x |
+| **Language** | PHP | 8.2-apache |
+| **Database** | MySQL | 8.0.35 |
+| **DB Management** | phpMyAdmin | 5.2.1 |
 | **Frontend** | Blade + Tailwind CSS | Latest |
 | **Build Tool** | Vite | Latest |
 | **Container** | Docker | 20.10+ |
-| **Web Server** | Apache 2.4 | Latest |
-| **Process Manager** | Supervisor | Latest |
-| **Database Management** | phpMyAdmin | 5.2.1 |
 
 ---
 
@@ -164,183 +102,40 @@ MYSQL_ROOT_PASSWORD=your_secure_root_password
 
 ```
 .
-├── app/                    # Application Logic
-│   ├── Http/Controllers/   # Request Handlers
-│   ├── Models/             # Database Models
-│   ├── Notifications/      # Notification Classes
-│   └── Providers/          # Service Providers
-│
-├── database/               # Database Layer
-│   ├── database.sqlite     # SQLite Database (opsional)
-│   ├── migrations/         # Migrations
-│   └── seeders/            # Sample Data
-│
-├── resources/              # Frontend Assets
-│   ├── views/              # Blade Templates
-│   ├── css/                # Tailwind CSS
-│   └── js/                 # JavaScript
-│
-├── routes/                 # Route Definitions
-├── storage/                # Runtime Storage
-├── config/                 # Configuration
-│
-├── docker/                 # Docker Configuration
-│   ├── config/             # Configuration files
-│   └── scripts/            # Setup scripts
-│
-├── .env                    # Environment Config ⭐
-├── docker-compose.yml      # Docker Config ⭐
-├── docker-compose.multi.yml # Multi-service Config ⭐
-├── Dockerfile              # Standard Docker Image ⭐
-├── Dockerfile.multi         # Multi-service Image ⭐
-├── composer.json           # PHP Dependencies
-├── package.json            # Node Dependencies
-│
+├── app/                    # Application Logic (MVC)
+├── docker/                 # Docker Specific Configs (MySQL, logs)
+├── database/               # Database Layer (Migrations, Seeders)
+├── resources/              # Frontend Assets (Views, CSS, JS)
+├── routes/                 # Route Definitions (Web, Console)
+├── scripts/                # Deployment & Utility Scripts
+│   └── deploy.sh           # Main Deployment Script ⭐
+├── .env.docker             # Environment Template for Docker ⭐
+├── docker-compose.v2.2.yml # Multi-service Orchestration ⭐
+├── Dockerfile.v2.2         # Optimized App Image ⭐
 └── 📚 Documentation
     ├── README.md           # This file
-    └── SETUP.md            # Setup Guide
+    ├── GITHUB_OVERVIEW.md  # GitHub Repository Overview
+    └── DOCKER_HUB_OVERVIEW.md # Docker Hub Guide
 ```
 
 ---
 
-## 🗄️ Database Models
+## 🔧 Maintenance Commands
 
-### 1. **User**
-- id, name, email, password, role, timestamps
-
-### 2. **Category**
-- id, name, slug, description, icon, is_active, timestamps
-
-### 3. **Ticket**
-- id, user_id, category_id, assigned_to, title, description, status, priority, timestamps
-
-### 4. **TicketResponse**
-- id, ticket_id, user_id, response, is_internal, timestamps
-
-### 5. **TicketAttachment**
-- id, ticket_id, file_path, file_name, file_size, mime_type, timestamps
-
----
-
-## 🔧 Common Commands
-
-### Development
+### Deployment Script
+Gunakan skrip deploy untuk manajemen yang lebih mudah:
 ```bash
-npm run dev          # Hot reload
-npm run build        # Build for production
-php artisan serve    # Start dev server
+./scripts/deploy.sh deploy    # Build dan jalankan semua
+./scripts/deploy.sh status    # Cek status layanan
+./scripts/deploy.sh backup    # Backup database dan storage
+./scripts/deploy.sh logs      # Lihat log real-time
 ```
 
-### Database
+### Manual Docker
 ```bash
-php artisan migrate              # Run migrations
-php artisan migrate:fresh --seed # Reset with data
+docker-compose ps      # Status
+docker-compose down    # Stop
 ```
-
-### Docker
-```bash
-# Multi-service container
-docker-compose -f docker-compose.multi.yml up -d
-docker-compose -f docker-compose.multi.yml down
-
-# Standard multi-container
-docker-compose up -d
-docker-compose down
-docker-compose logs -f
-```
-
----
-
-## 🔐 Security Features
-
-✅ CSRF Protection  
-✅ SQL Injection Prevention  
-✅ XSS Protection  
-✅ Password Hashing (bcrypt)  
-✅ Role-Based Access Control  
-✅ Authentication Middleware  
-✅ Session Management  
-
----
-
-## 🐳 Docker Info
-
-### Multi-Service Image Details
-- **Base**: `ubuntu:22.04`
-- **Services**: Laravel + MySQL + phpMyAdmin + Supervisor
-- **Size**: ~2.5 GB
-- **Port**: 80 (Laravel & phpMyAdmin)
-- **Database Port**: 3306 (opsional)
-
-### GitHub Container Registry
-**Repository**: `ghcr.io/nasrulmufid/it-help-desk/it-help-desk-multi`
-
-```bash
-# Pull the latest version
-docker pull ghcr.io/nasrulmufid/it-help-desk/it-help-desk-multi:latest
-
-# Pull specific version
-docker pull ghcr.io/nasrulmufid/it-help-desk/it-help-desk-multi:v5.0
-```
-
----
-
-## 📝 Key Files
-
-| File | Purpose |
-|------|---------|
-| `.env` | Environment configuration |
-| `Dockerfile.multi` | Multi-service Docker image definition |
-| `docker-compose.multi.yml` | Multi-service container orchestration |
-| `composer.json` | PHP dependencies |
-| `package.json` | JavaScript dependencies |
-
----
-
-## 📚 Documentation
-
-- **SETUP.md** - Local development setup guide
-- **DOCKER_HUB_README.md** - Docker deployment guide
-
----
-
-## 🐛 Troubleshooting
-
-| Issue | Solution |
-|-------|----------|
-| Database connection failed | Check environment variables, pastikan MySQL sudah running |
-| Permission denied on storage | `chmod -R 775 storage` di dalam container |
-| Assets not loading | `npm run build` atau restart container |
-| Port already in use | Ubah port di docker-compose.yml |
-| MySQL tidak bisa diakses | Cek port 3306 dan firewall |
-| phpMyAdmin error login | Gunakan kredensial MySQL yang benar |
-
----
-
-## 📊 Project Stats
-
-- **Database Tables**: 8
-- **User Roles**: 3
-- **Ticket Categories**: 8
-- **Default Accounts**: 3 (for testing)
-- **Container Size**: ~2.5 GB (multi-service)
-- **Build Time**: ~15-20 menit
-
----
-
-## 🎯 Features at a Glance
-
-✅ User authentication & roles  
-✅ Ticket lifecycle management  
-✅ Categorization & prioritization  
-✅ Real-time communication  
-✅ Admin dashboard  
-✅ Technician assignment  
-✅ File attachments  
-✅ Notifications  
-✅ Multi-service container  
-✅ Built-in phpMyAdmin  
-✅ GitHub Actions CI/CD  
 
 ---
 
@@ -350,6 +145,5 @@ MIT License
 
 ---
 
-**Version**: 5.0 | **Updated**: January 2026 | **Docker**: Multi-Service Available
-
-Happy coding! 🎉
+**Version**: 2.2.0 | **Updated**: January 2026  
+**Made with ❤️ by [Nasrul Mufid](https://github.com/nasrulmufid)**

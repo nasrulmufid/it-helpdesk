@@ -10,92 +10,80 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        User::firstOrCreate(
-            ['email' => 'admin@helpdesk.com'],
-            [
-                'name' => 'Administrator',
-                'password' => Hash::make('password'),
-                'role' => 'admin',
-                'phone' => '081234567890',
-                'department' => 'IT',
-            ]
-        );
+        // Admin
+        User::create([
+            'name' => 'Administrator',
+            'email' => 'admin@helpdesk.com',
+            'password' => Hash::make('password'),
+            'role' => 'admin',
+            'phone' => '081234567890',
+            'department' => 'IT',
+        ]);
 
-        User::firstOrCreate(
-            ['email' => 'gm@helpdesk.com'],
-            [
-                'name' => 'General Manager',
-                'password' => Hash::make('password'),
-                'role' => 'general_manager',
-                'phone' => '081234567899',
-                'department' => 'Management',
-            ]
-        );
+        // General Manager
+        User::create([
+            'name' => 'General Manager',
+            'email' => 'gm@helpdesk.com',
+            'password' => Hash::make('password'),
+            'role' => 'general_manager',
+            'phone' => '081234567899',
+            'department' => 'Management',
+        ]);
 
-        User::firstOrCreate(
-            ['email' => 'tech1@helpdesk.com'],
-            [
-                'name' => 'Teknisi 1',
-                'password' => Hash::make('password'),
-                'role' => 'technician',
-                'phone' => '081234567891',
-                'department' => 'IT Support',
-            ]
-        );
+        // Technician
+        User::create([
+            'name' => 'Teknisi 1',
+            'email' => 'tech1@helpdesk.com',
+            'password' => Hash::make('password'),
+            'role' => 'technician',
+            'phone' => '081234567891',
+            'department' => 'IT Support',
+        ]);
 
-        User::firstOrCreate(
-            ['email' => 'tech2@helpdesk.com'],
-            [
-                'name' => 'Teknisi 2',
-                'password' => Hash::make('password'),
-                'role' => 'technician',
-                'phone' => '081234567892',
-                'department' => 'IT Support',
-            ]
-        );
+        User::create([
+            'name' => 'Teknisi 2',
+            'email' => 'tech2@helpdesk.com',
+            'password' => Hash::make('password'),
+            'role' => 'technician',
+            'phone' => '081234567892',
+            'department' => 'IT Support',
+        ]);
 
-        User::firstOrCreate(
-            ['email' => 'user@helpdesk.com'],
-            [
-                'name' => 'User Demo',
-                'password' => Hash::make('password'),
-                'role' => 'user',
-                'phone' => '081234567893',
-                'department' => 'Finance',
-            ]
-        );
+        // Regular Users
+        User::create([
+            'name' => 'User Demo',
+            'email' => 'user@helpdesk.com',
+            'password' => Hash::make('password'),
+            'role' => 'user',
+            'phone' => '081234567893',
+            'department' => 'Finance',
+        ]);
 
-        User::firstOrCreate(
-            ['email' => 'john@helpdesk.com'],
-            [
-                'name' => 'John Doe',
-                'password' => Hash::make('password'),
-                'role' => 'user',
-                'phone' => '081234567894',
-                'department' => 'Marketing',
-            ]
-        );
+        User::create([
+            'name' => 'John Doe',
+            'email' => 'john@helpdesk.com',
+            'password' => Hash::make('password'),
+            'role' => 'user',
+            'phone' => '081234567894',
+            'department' => 'Marketing',
+        ]);
 
-        User::firstOrCreate(
-            ['email' => 'jane@helpdesk.com'],
-            [
-                'name' => 'Jane Smith',
-                'password' => Hash::make('password'),
-                'role' => 'user',
-                'phone' => '081234567895',
-                'department' => 'HR',
-            ]
-        );
+        User::create([
+            'name' => 'Jane Smith',
+            'email' => 'jane@helpdesk.com',
+            'password' => Hash::make('password'),
+            'role' => 'user',
+            'phone' => '081234567895',
+            'department' => 'HR',
+        ]);
 
-        User::firstOrCreate(
-            ['email' => 'bob@helpdesk.com'],
-            [
-                'name' => 'Bob Wilson',
-                'password' => Hash::make('password'),
-                'role' => 'user',
-                'phone' => '081234567896',
-                'department' => 'Sales',
-            ]
-        );
+        User::create([
+            'name' => 'Bob Wilson',
+            'email' => 'bob@helpdesk.com',
+            'password' => Hash::make('password'),
+            'role' => 'user',
+            'phone' => '081234567896',
+            'department' => 'Sales',
+        ]);
     }
 }

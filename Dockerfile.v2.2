@@ -100,7 +100,7 @@ COPY <<EOF /etc/apache2/sites-available/000-default.conf
 EOF
 
 # Copy startup script
-COPY start.sh /usr/local/bin/start.sh
+COPY start.v2.2.sh /usr/local/bin/start.sh
 RUN sed -i 's/\r$//' /usr/local/bin/start.sh && chmod +x /usr/local/bin/start.sh
 
 # Create health check script

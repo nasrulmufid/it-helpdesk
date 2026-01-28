@@ -3,7 +3,6 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\TicketController;
-use App\Http\Controllers\TicketAttachmentController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\NotificationController;
@@ -36,8 +35,6 @@ Route::middleware('auth')->group(function () {
         Route::post('/{ticket}/responses', [TicketController::class, 'addResponse'])->name('addResponse');
         Route::post('/{ticket}/assign', [TicketController::class, 'assign'])->name('assign');
         Route::post('/{ticket}/assign-self', [TicketController::class, 'assignToSelf'])->name('assignToSelf');
-        Route::get('/{ticket}/attachments/{attachment}/view', [TicketAttachmentController::class, 'view'])->name('attachments.view');
-        Route::get('/{ticket}/attachments/{attachment}/download', [TicketAttachmentController::class, 'download'])->name('attachments.download');
     });
 
     // Notifications

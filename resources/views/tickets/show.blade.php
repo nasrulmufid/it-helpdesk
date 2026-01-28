@@ -88,55 +88,6 @@
             </div>
         </div>
 
-        <!-- Attachments -->
-        <div class="bg-gray-800 rounded-xl border border-gray-700 p-6">
-            <h3 class="text-lg font-semibold text-white mb-4">Lampiran ({{ $ticket->attachments->count() }})</h3>
-
-            @if($ticket->attachments->isEmpty())
-                <div class="text-center py-8 text-gray-400">
-                    <p>Tidak ada lampiran</p>
-                </div>
-            @else
-                <div class="space-y-3">
-                    @foreach($ticket->attachments as $attachment)
-                        @php
-                            $isImage = $attachment->file_type && str_starts_with($attachment->file_type, 'image/');
-                            $isPdf = $attachment->file_type === 'application/pdf';
-                        @endphp
-                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-gray-700 rounded-lg p-4">
-                            <div class="min-w-0">
-                                <p class="text-white font-medium truncate">{{ $attachment->file_name }}</p>
-                                <p class="text-sm text-gray-400">
-                                    {{ $attachment->file_size_formatted }}
-                                    @if($attachment->file_type)
-                                        • {{ $attachment->file_type }}
-                                    @endif
-                                </p>
-                            </div>
-                            <div class="flex gap-2 shrink-0">
-                                @if($isImage || $isPdf)
-                                    <a
-                                        href="{{ route('tickets.attachments.view', [$ticket, $attachment]) }}"
-                                        target="_blank"
-                                        rel="noopener"
-                                        class="px-4 py-2 bg-gray-600 hover:bg-gray-500 text-white text-sm font-semibold rounded-lg transition-all"
-                                    >
-                                        Lihat
-                                    </a>
-                                @endif
-                                <a
-                                    href="{{ route('tickets.attachments.download', [$ticket, $attachment]) }}"
-                                    class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-semibold rounded-lg transition-all"
-                                >
-                                    Download
-                                </a>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-            @endif
-        </div>
-
         <!-- Responses -->
         <div class="bg-gray-800 rounded-xl border border-gray-700 p-6">
             <h3 class="text-lg font-semibold text-white mb-4">Tanggapan ({{ $ticket->responses->count() }})</h3>

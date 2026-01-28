@@ -5,24 +5,16 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Ticket;
 use App\Models\Category;
-use App\Models\TicketAttachment;
 use App\Models\TicketResponse;
 use App\Models\User;
 use App\Notifications\TicketActivityNotification;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Notification;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 
 class TicketController extends Controller
 {
     public function index(Request $request)
     {
-        $user = Auth::user();
-        if (!$user instanceof User) {
-            abort(403, 'Unauthorized');
-        }
+        $user = auth()->user();
 
         $query = Ticket::with(['user', 'category', 'assignedTo']);
 
@@ -37,16 +29,6 @@ class TicketController extends Controller
 
         if ($request->has('assigned_to') && $request->assigned_to != '') {
             $query->where('assigned_to', $request->assigned_to);
-        }
-
-        if ($request->filled('q')) {
-            $search = trim((string) $request->q);
-            $query->where(function ($q) use ($search) {
-                $q->where('ticket_number', 'like', '%' . $search . '%')
-                    ->orWhereHas('user', function ($userQuery) use ($search) {
-                        $userQuery->where('name', 'like', '%' . $search . '%');
-                    });
-            });
         }
 
         // User-specific filtering
@@ -75,55 +57,17 @@ class TicketController extends Controller
 
     public function store(Request $request)
     {
-        $user = Auth::user();
-        if (!$user instanceof User) {
-            abort(403, 'Unauthorized');
-        }
-
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'category_id' => 'required|exists:categories,id',
             'priority' => 'required|in:low,medium,high,critical',
-            'attachments' => 'required|array|min:1',
-            'attachments.*' => 'required|file|max:10240|mimes:jpg,jpeg,png,webp,gif,pdf,doc,docx,xls,xlsx,ppt,pptx,txt',
         ]);
 
-        $validated['user_id'] = $user->id;
+        $validated['user_id'] = auth()->id();
         $validated['status'] = 'open';
 
-        $storedPaths = [];
-
-        DB::beginTransaction();
-        try {
-            $ticket = Ticket::createWithUniqueTicketNumber($validated);
-
-            foreach ((array) $request->file('attachments', []) as $file) {
-                $directory = 'ticket-attachments/' . $ticket->id;
-                $extension = $file->getClientOriginalExtension();
-                $storedFileName = Str::uuid()->toString() . ($extension ? ('.' . $extension) : '');
-                $storedPath = $file->storeAs($directory, $storedFileName, 'local');
-                $storedPaths[] = $storedPath;
-
-                TicketAttachment::create([
-                    'ticket_id' => $ticket->id,
-                    'file_name' => $file->getClientOriginalName(),
-                    'file_path' => $storedPath,
-                    'file_type' => $file->getClientMimeType(),
-                    'file_size' => $file->getSize(),
-                ]);
-            }
-
-            DB::commit();
-        } catch (\Throwable $e) {
-            DB::rollBack();
-
-            foreach ($storedPaths as $storedPath) {
-                Storage::disk('local')->delete($storedPath);
-            }
-
-            throw $e;
-        }
+        $ticket = Ticket::createWithUniqueTicketNumber($validated);
 
         // Notify admins, general managers, and technicians about new ticket
         $recipients = User::whereIn('role', ['admin', 'general_manager', 'technician'])->get();
@@ -132,7 +76,7 @@ class TicketController extends Controller
             'tiket_baru',
             $ticket,
             'Tiket baru dibuat',
-            sprintf('Tiket %s dibuat oleh %s dengan prioritas %s', $ticket->ticket_number, $user->name, ucfirst($ticket->priority))
+            sprintf('Tiket %s dibuat oleh %s dengan prioritas %s', $ticket->ticket_number, auth()->user()->name, ucfirst($ticket->priority))
         );
 
         return redirect()->route('tickets.show', $ticket)
@@ -142,10 +86,7 @@ class TicketController extends Controller
     public function show(Ticket $ticket)
     {
         // Authorization check
-        $user = Auth::user();
-        if (!$user instanceof User) {
-            abort(403, 'Unauthorized');
-        }
+        $user = auth()->user();
         if ($user->isUser() && $ticket->user_id !== $user->id) {
             abort(403, 'Unauthorized');
         }
@@ -159,10 +100,7 @@ class TicketController extends Controller
 
     public function update(Request $request, Ticket $ticket)
     {
-        $user = Auth::user();
-        if (!$user instanceof User) {
-            abort(403, 'Unauthorized');
-        }
+        $user = auth()->user();
 
         if ($user->isAdmin() || $user->isTechnician()) {
             $previousStatus = $ticket->status;
@@ -217,21 +155,16 @@ class TicketController extends Controller
 
     public function addResponse(Request $request, Ticket $ticket)
     {
-        $user = Auth::user();
-        if (!$user instanceof User) {
-            abort(403, 'Unauthorized');
-        }
-
         $validated = $request->validate([
             'message' => 'required|string',
             'is_internal' => 'nullable|boolean',
         ]);
 
-        $validated['user_id'] = $user->id;
+        $validated['user_id'] = auth()->id();
         $validated['ticket_id'] = $ticket->id;
 
         // Only technicians and admins can add internal notes
-        if (!$user->isAdmin() && !$user->isTechnician()) {
+        if (!auth()->user()->isAdmin() && !auth()->user()->isTechnician()) {
             $validated['is_internal'] = false;
         }
 
@@ -266,10 +199,7 @@ class TicketController extends Controller
 
     public function assign(Request $request, Ticket $ticket)
     {
-        $user = Auth::user();
-        if (!$user instanceof User) {
-            abort(403, 'Unauthorized');
-        }
+        $user = auth()->user();
 
         if (!$user->isAdmin() && !$user->isTechnician()) {
             abort(403, 'Unauthorized');
@@ -300,10 +230,7 @@ class TicketController extends Controller
 
     public function assignToSelf(Ticket $ticket)
     {
-        $user = Auth::user();
-        if (!$user instanceof User) {
-            abort(403, 'Unauthorized');
-        }
+        $user = auth()->user();
 
         if (!$user->isTechnician() && !$user->isAdmin()) {
             abort(403, 'Unauthorized');
@@ -325,16 +252,12 @@ class TicketController extends Controller
 
     private function sendTicketNotification($recipients, string $type, Ticket $ticket, string $title, string $message): void
     {
-        $sender = Auth::user();
-        $senderId = $sender instanceof User ? $sender->id : null;
-        $senderName = $sender instanceof User ? $sender->name : null;
-
         $users = collect($recipients)
             ->flatten()
             ->filter()
             ->unique('id')
-            ->reject(function ($recipient) use ($senderId) {
-                return $senderId && $recipient && $recipient->id === $senderId;
+            ->reject(function ($recipient) {
+                return $recipient && $recipient->id === auth()->id();
             });
 
         if ($users->isEmpty()) {
@@ -348,8 +271,8 @@ class TicketController extends Controller
             'title' => $title,
             'message' => $message,
             'url' => route('tickets.show', $ticket),
-            'by_user_id' => $senderId,
-            'by_user_name' => $senderName,
+            'by_user_id' => auth()->id(),
+            'by_user_name' => auth()->user()->name,
         ]));
     }
 }

@@ -6,16 +6,12 @@ use Illuminate\Http\Request;
 use App\Models\Ticket;
 use App\Models\Category;
 use App\Models\User;
-use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        $user = Auth::user();
-        if (!$user instanceof User) {
-            abort(403, 'Unauthorized');
-        }
+        $user = auth()->user();
 
         if ($user->isAdmin()) {
             return $this->adminDashboard();
@@ -53,10 +49,7 @@ class DashboardController extends Controller
 
     private function technicianDashboard()
     {
-        $user = Auth::user();
-        if (!$user instanceof User) {
-            abort(403, 'Unauthorized');
-        }
+        $user = auth()->user();
 
         $stats = [
             'assigned_tickets' => Ticket::where('assigned_to', $user->id)->count(),
@@ -82,10 +75,7 @@ class DashboardController extends Controller
 
     private function userDashboard()
     {
-        $user = Auth::user();
-        if (!$user instanceof User) {
-            abort(403, 'Unauthorized');
-        }
+        $user = auth()->user();
 
         $stats = [
             'total_tickets' => Ticket::where('user_id', $user->id)->count(),
