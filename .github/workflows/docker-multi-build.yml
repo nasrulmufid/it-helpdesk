@@ -44,6 +44,7 @@ jobs:
         tags: |
           type=ref,event=branch
           type=ref,event=pr
+          type=ref,event=tag
           type=semver,pattern={{version}}
           type=semver,pattern={{major}}.{{minor}}
           type=semver,pattern={{major}}
@@ -83,12 +84,12 @@ jobs:
           ### Quick Start
           ```bash
           # Pull the image
-          docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.version }}
+          docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}
           
           # Run the container
           docker run -d -p 80:80 --name it-help-desk-multi \
             -e APP_KEY=base64:$(openssl rand -base64 32) \
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.version }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}
           ```
           
           ### Access Points
