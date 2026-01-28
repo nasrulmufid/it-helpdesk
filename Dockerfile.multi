@@ -59,13 +59,7 @@ RUN wget -O /tmp/phpmyadmin.tar.gz https://files.phpmyadmin.net/phpMyAdmin/5.2.1
 RUN a2enmod rewrite php8.2
 
 # Configure MySQL
-RUN service mysql start && \
-    mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'root_password';" && \
-    mysql -e "CREATE DATABASE IF NOT EXISTS it_helpdesk;" && \
-    mysql -e "CREATE USER IF NOT EXISTS 'it_helpdesk_user'@'localhost' IDENTIFIED BY 'it_helpdesk_pass';" && \
-    mysql -e "GRANT ALL PRIVILEGES ON it_helpdesk.* TO 'it_helpdesk_user'@'localhost';" && \
-    mysql -e "FLUSH PRIVILEGES;" && \
-    service mysql stop
+RUN mkdir -p /var/run/mysqld && chown mysql:mysql /var/run/mysqld && chmod 777 /var/run/mysqld
 
 # Copy Apache configuration
 COPY <<EOF /etc/apache2/sites-available/000-default.conf
@@ -165,11 +159,19 @@ service mysql start
 # Wait for MySQL to be ready
 echo "Waiting for MySQL to be ready..."
 for i in {1..30}; do
-    if mysqladmin ping -h localhost -u root -proot_password --silent; then
-        echo "MySQL is ready!"
+    # Try to connect without password first (default for fresh install)
+    if mysqladmin ping -h localhost --silent; then
+        echo "MySQL is ready (no password)!"
+        # Set root password if it's a fresh install
+        mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'root_password'; FLUSH PRIVILEGES;"
         break
     fi
-    echo "Waiting for MySQL... (attempt \$i/30)"
+    # Try with password
+    if mysqladmin ping -h localhost -u root -proot_password --silent; then
+        echo "MySQL is ready (with password)!"
+        break
+    fi
+    echo "Waiting for MySQL... (attempt $i/30)"
     sleep 2
 done
 
