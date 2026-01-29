@@ -32,15 +32,27 @@ if [ $timeout -eq 0 ]; then
 fi
 
 echo "🔐 Configuring databases and users..."
-mariadb -e "CREATE DATABASE IF NOT EXISTS it_helpdesk;"
-mariadb -e "CREATE DATABASE IF NOT EXISTS phpmyadmin;"
-mariadb -e "GRANT ALL PRIVILEGES ON phpmyadmin.* TO 'phpmyadmin'@'localhost' IDENTIFIED BY 'phpmyadmin_pass';"
-mariadb -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root_pass_2024_secure';"
-mariadb -e "CREATE USER IF NOT EXISTS 'helpdesk_user'@'localhost' IDENTIFIED BY 'helpdesk_pass_2024';"
-mariadb -e "GRANT ALL PRIVILEGES ON it_helpdesk.* TO 'helpdesk_user'@'localhost';"
-mariadb -e "FLUSH PRIVILEGES;"
+# Try to connect without password first (initial run)
+if mariadb -u root -e "status" >/dev/null 2>&1; then
+    echo "🔑 Root password not set, configuring now..."
+    mariadb -e "CREATE DATABASE IF NOT EXISTS it_helpdesk;"
+    mariadb -e "CREATE DATABASE IF NOT EXISTS phpmyadmin;"
+    mariadb -e "GRANT ALL PRIVILEGES ON phpmyadmin.* TO 'phpmyadmin'@'localhost' IDENTIFIED BY 'phpmyadmin_pass';"
+    mariadb -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root_pass_2024_secure';"
+    mariadb -e "CREATE USER IF NOT EXISTS 'helpdesk_user'@'localhost' IDENTIFIED BY 'helpdesk_pass_2024';"
+    mariadb -e "GRANT ALL PRIVILEGES ON it_helpdesk.* TO 'helpdesk_user'@'localhost';"
+    mariadb -e "FLUSH PRIVILEGES;"
+    echo "✅ Databases and users configured successfully."
+elif mariadb -u root -proot_pass_2024_secure -e "status" >/dev/null 2>&1; then
+    echo "✅ Root password already set and working correctly."
+else
+    echo "❌ Access denied for root user. Manual intervention may be required."
+    exit 1
+fi
 
 echo "🗄️ Running database migrations and seeders..."
+# Use the root password for migrations to ensure access
+export DB_PASSWORD=helpdesk_pass_2024
 php artisan migrate --force --seed || echo "⚠️ Migration failed, database might already be setup."
 
 # Create storage link
