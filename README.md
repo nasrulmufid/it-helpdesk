@@ -87,8 +87,13 @@ Satu container yang berisi Apache, PHP, MySQL, dan phpMyAdmin. Cocok untuk testi
 docker build -t it-helpdesk-monolithic -f Dockerfile.monolithic .
 
 # Jalankan container
-docker run -d -p 8000:80 -p 3306:3306 --name it-helpdesk-monolithic it-helpdesk-monolithic
+docker run -d -p 8000:80 -p 8082:82 -p 3306:3306 --name it-helpdesk-monolithic it-helpdesk-monolithic
 ```
+
+### Access Points (Monolithic)
+- **Aplikasi**: `http://localhost:8000`
+- **phpMyAdmin**: `http://localhost:8082` (User: `root`, Pass: `root_pass_2024_secure`)
+- **MySQL**: `localhost:3306`
 
 ---
 
