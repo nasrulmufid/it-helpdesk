@@ -32,26 +32,34 @@ if [ $timeout -eq 0 ]; then
 fi
 
 echo "🔐 Configuring databases and users..."
-# Try to connect without password first (initial run)
-if mariadb -u root -e "status" >/dev/null 2>&1; then
-    echo "🔑 Root password not set, configuring now..."
-    mariadb -e "CREATE DATABASE IF NOT EXISTS it_helpdesk;"
-    mariadb -e "CREATE DATABASE IF NOT EXISTS phpmyadmin;"
-    mariadb -e "GRANT ALL PRIVILEGES ON phpmyadmin.* TO 'phpmyadmin'@'localhost' IDENTIFIED BY 'phpmyadmin_pass';"
-    mariadb -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root_pass_2024_secure';"
-    mariadb -e "CREATE USER IF NOT EXISTS 'helpdesk_user'@'localhost' IDENTIFIED BY 'helpdesk_pass_2024';"
-    mariadb -e "GRANT ALL PRIVILEGES ON it_helpdesk.* TO 'helpdesk_user'@'localhost';"
-    mariadb -e "FLUSH PRIVILEGES;"
-    echo "✅ Databases and users configured successfully."
-elif mariadb -u root -proot_pass_2024_secure -e "status" >/dev/null 2>&1; then
-    echo "✅ Root password already set and working correctly."
+# Prepare setup SQL
+SETUP_SQL=$(cat <<EOF
+CREATE DATABASE IF NOT EXISTS it_helpdesk;
+CREATE DATABASE IF NOT EXISTS phpmyadmin;
+GRANT ALL PRIVILEGES ON phpmyadmin.* TO 'phpmyadmin'@'localhost' IDENTIFIED BY 'phpmyadmin_pass';
+CREATE USER IF NOT EXISTS 'helpdesk_user'@'localhost' IDENTIFIED BY 'helpdesk_pass_2024';
+GRANT ALL PRIVILEGES ON it_helpdesk.* TO 'helpdesk_user'@'localhost';
+ALTER USER 'root'@'localhost' IDENTIFIED BY 'root_pass_2024_secure';
+FLUSH PRIVILEGES;
+EOF
+)
+
+# Try setup without password first (initial run)
+if echo "$SETUP_SQL" | mariadb -u root --protocol=socket >/dev/null 2>&1; then
+    echo "✅ Databases and users configured successfully (initial setup)."
+# Try setup with the target root password (re-run or volume persistent)
+elif echo "$SETUP_SQL" | mariadb -u root -proot_pass_2024_secure --protocol=socket >/dev/null 2>&1; then
+    echo "✅ Databases and users already configured (setup verified with password)."
 else
-    echo "❌ Access denied for root user. Manual intervention may be required."
+    echo "❌ Access denied for root user during configuration. Attempting debug..."
+    # If both fail, try to show the actual error for one simple command
+    mariadb -u root -e "status" --protocol=socket || echo "Manual intervention required for MySQL root access."
     exit 1
 fi
 
 echo "🗄️ Running database migrations and seeders..."
-# Use the root password for migrations to ensure access
+# Ensure Laravel uses the correct user credentials for migrations
+export DB_USERNAME=helpdesk_user
 export DB_PASSWORD=helpdesk_pass_2024
 php artisan migrate --force --seed || echo "⚠️ Migration failed, database might already be setup."
 
