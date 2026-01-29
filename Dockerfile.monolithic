@@ -102,18 +102,8 @@ RUN echo "Listen 82" >> /etc/apache2/ports.conf && \
     a2ensite phpmyadmin.conf
 
 # Configure MySQL Security & Initial Setup
-RUN mkdir -p /run/mysqld && chown mysql:mysql /run/mysqld && \
-    mariadb-install-db --user=mysql --datadir=/var/lib/mysql && \
-    mariadbd --user=mysql --datadir=/var/lib/mysql --skip-networking & \
-    sleep 5 && \
-    mariadb -e "CREATE DATABASE IF NOT EXISTS it_helpdesk;" && \
-    mariadb -e "CREATE DATABASE IF NOT EXISTS phpmyadmin;" && \
-    mariadb -e "GRANT ALL PRIVILEGES ON phpmyadmin.* TO 'phpmyadmin'@'localhost' IDENTIFIED BY 'phpmyadmin_pass';" && \
-    mariadb -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root_pass_2024_secure';" && \
-    mariadb -e "CREATE USER IF NOT EXISTS 'helpdesk_user'@'localhost' IDENTIFIED BY 'helpdesk_pass_2024';" && \
-    mariadb -e "GRANT ALL PRIVILEGES ON it_helpdesk.* TO 'helpdesk_user'@'localhost';" && \
-    mariadb -e "FLUSH PRIVILEGES;" && \
-    mariadb-admin -u root -proot_pass_2024_secure shutdown
+# (Moved to runtime in start-monolithic.sh for build stability)
+RUN mkdir -p /run/mysqld && chown mysql:mysql /run/mysqld
 
 # Configure phpMyAdmin to allow root login and fix controluser
 RUN sed -i "s/\/\/ \$cfg\['Servers'\]\[\$i\]\['AllowNoPassword'\] = TRUE;/\$cfg\['Servers'\]\[\$i\]\['AllowNoPassword'\] = FALSE;/g" /etc/phpmyadmin/config.inc.php && \
