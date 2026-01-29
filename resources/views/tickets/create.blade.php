@@ -12,7 +12,7 @@
 <!-- Form Card -->
 <div class="max-w-3xl">
     <div class="bg-gray-800 rounded-xl border border-gray-700 p-8">
-        <form method="POST" action="{{ route('tickets.store') }}">
+        <form method="POST" action="{{ route('tickets.store') }}" enctype="multipart/form-data">
             @csrf
             
             <!-- Title -->
@@ -122,7 +122,7 @@
             </div>
 
             <!-- Description -->
-            <div class="mb-8">
+            <div class="mb-6">
                 <label for="description" class="block text-sm font-medium text-gray-300 mb-2">
                     Deskripsi <span class="text-red-400">*</span>
                 </label>
@@ -139,6 +139,62 @@
                     <p class="mt-2 text-sm text-red-400">{{ $message }}</p>
                 @enderror
             </div>
+
+            <!-- Attachments -->
+            <div class="mb-8">
+                <label for="attachments" class="block text-sm font-medium text-gray-300 mb-2">
+                    Lampiran (Opsional)
+                </label>
+                <div class="relative group">
+                    <input 
+                        type="file" 
+                        id="attachments" 
+                        name="attachments[]" 
+                        multiple
+                        class="hidden"
+                        onchange="updateFileList(this)"
+                    >
+                    <label 
+                        for="attachments" 
+                        class="flex flex-col items-center justify-center w-full h-32 px-4 transition bg-gray-700 border-2 border-gray-600 border-dashed rounded-lg appearance-none cursor-pointer hover:border-purple-500 hover:bg-gray-650 focus:outline-none"
+                    >
+                        <span class="flex items-center space-x-2">
+                            <svg class="w-6 h-6 text-gray-400 group-hover:text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                            </svg>
+                            <span class="font-medium text-gray-400 group-hover:text-purple-500">Klik untuk unggah atau seret file ke sini</span>
+                        </span>
+                        <span class="text-xs text-gray-500 mt-1">JPG, PNG, PDF, DOCX (Maks. 5MB per file)</span>
+                    </label>
+                </div>
+                <div id="file-list" class="mt-3 space-y-2"></div>
+                @error('attachments.*')
+                    <p class="mt-2 text-sm text-red-400">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <script>
+                function updateFileList(input) {
+                    const list = document.getElementById('file-list');
+                    list.innerHTML = '';
+                    
+                    if (input.files.length > 0) {
+                        for (let i = 0; i < input.files.length; i++) {
+                            const file = input.files[i];
+                            const div = document.createElement('div');
+                            div.className = 'flex items-center text-sm text-gray-300 bg-gray-700 px-3 py-2 rounded-lg';
+                            div.innerHTML = `
+                                <svg class="w-4 h-4 mr-2 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-2.828-6.828l-6.414 6.586a6 6 0 008.486 8.486L20.5 13"></path>
+                                </svg>
+                                <span class="truncate flex-1">${file.name}</span>
+                                <span class="text-xs text-gray-500 ml-2">(${(file.size / 1024 / 1024).toFixed(2)} MB)</span>
+                            `;
+                            list.appendChild(div);
+                        }
+                    }
+                }
+            </script>
 
             <!-- Action Buttons -->
             <div class="flex flex-col sm:flex-row gap-4">

@@ -86,6 +86,61 @@
                 <h3 class="text-lg font-semibold text-white mb-3">Deskripsi</h3>
                 <p class="text-gray-300 leading-relaxed whitespace-pre-wrap">{{ $ticket->description }}</p>
             </div>
+
+            <!-- Attachments -->
+            @if($ticket->attachments->count() > 0)
+            <div class="border-t border-gray-700 mt-6 pt-6">
+                <h3 class="text-lg font-semibold text-white mb-4">Lampiran ({{ $ticket->attachments->count() }})</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    @foreach($ticket->attachments as $attachment)
+                    <div class="bg-gray-700 rounded-lg p-4 border border-gray-600 flex flex-col h-full">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center overflow-hidden">
+                                <svg class="w-5 h-5 text-purple-500 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-2.828-6.828l-6.414 6.586a6 6 0 008.486 8.486L20.5 13"></path>
+                                </svg>
+                                <span class="text-white text-sm font-medium truncate" title="{{ $attachment->file_name }}">
+                                    {{ $attachment->file_name }}
+                                </span>
+                            </div>
+                            <span class="text-xs text-gray-400 ml-2 flex-shrink-0">{{ $attachment->file_size_formatted }}</span>
+                        </div>
+
+                        @if(Str::startsWith($attachment->file_type, 'image/'))
+                        <div class="mb-3 rounded overflow-hidden bg-gray-800 flex-grow">
+                            <a href="{{ asset('storage/' . $attachment->file_path) }}" target="_blank" class="block group relative">
+                                <img src="{{ asset('storage/' . $attachment->file_path) }}" alt="{{ $attachment->file_name }}" class="w-full h-32 object-cover transition group-hover:opacity-75">
+                                <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+                                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"></path>
+                                    </svg>
+                                </div>
+                            </a>
+                        </div>
+                        @else
+                        <div class="mb-3 rounded bg-gray-800 h-32 flex flex-col items-center justify-center flex-grow">
+                            <svg class="w-12 h-12 text-gray-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            <span class="text-xs text-gray-500 uppercase">{{ strtoupper(pathinfo($attachment->file_name, PATHINFO_EXTENSION)) }}</span>
+                        </div>
+                        @endif
+
+                        <a 
+                            href="{{ asset('storage/' . $attachment->file_path) }}" 
+                            download="{{ $attachment->file_name }}"
+                            class="w-full py-2 bg-gray-600 hover:bg-purple-600 text-white text-sm font-medium rounded transition flex items-center justify-center mt-auto"
+                        >
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                            </svg>
+                            Unduh
+                        </a>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+            @endif
         </div>
 
         <!-- Responses -->

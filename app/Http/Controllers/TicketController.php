@@ -62,12 +62,28 @@ class TicketController extends Controller
             'description' => 'required|string',
             'category_id' => 'required|exists:categories,id',
             'priority' => 'required|in:low,medium,high,critical',
+            'attachments.*' => 'nullable|file|mimes:jpg,jpeg,png,pdf,doc,docx,xls,xlsx,zip|max:5120', // Max 5MB per file
         ]);
 
         $validated['user_id'] = auth()->id();
         $validated['status'] = 'open';
 
         $ticket = Ticket::createWithUniqueTicketNumber($validated);
+
+        // Handle attachments
+        if ($request->hasFile('attachments')) {
+            foreach ($request->file('attachments') as $file) {
+                $fileName = $file->getClientOriginalName();
+                $filePath = $file->store('attachments', 'public');
+
+                $ticket->attachments()->create([
+                    'file_name' => $fileName,
+                    'file_path' => $filePath,
+                    'file_type' => $file->getClientMimeType(),
+                    'file_size' => $file->getSize(),
+                ]);
+            }
+        }
 
         // Notify admins, general managers, and technicians about new ticket
         $recipients = User::whereIn('role', ['admin', 'general_manager', 'technician'])->get();
