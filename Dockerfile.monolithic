@@ -104,9 +104,19 @@ RUN echo "Listen 82" >> /etc/apache2/ports.conf && \
 # Configure MySQL Security & Initial Setup
 RUN service mariadb start && \
     mariadb -e "CREATE DATABASE IF NOT EXISTS it_helpdesk;" && \
+    mariadb -e "CREATE DATABASE IF NOT EXISTS phpmyadmin;" && \
+    mariadb -e "GRANT ALL PRIVILEGES ON phpmyadmin.* TO 'phpmyadmin'@'localhost' IDENTIFIED BY 'phpmyadmin_pass';" && \
+    mariadb -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root_pass_2024_secure';" && \
     mariadb -e "CREATE USER IF NOT EXISTS 'helpdesk_user'@'localhost' IDENTIFIED BY 'helpdesk_pass_2024';" && \
     mariadb -e "GRANT ALL PRIVILEGES ON it_helpdesk.* TO 'helpdesk_user'@'localhost';" && \
     mariadb -e "FLUSH PRIVILEGES;"
+
+# Configure phpMyAdmin to allow root login and fix controluser
+RUN sed -i "s/\/\/ \$cfg\['Servers'\]\[\$i\]\['AllowNoPassword'\] = TRUE;/\$cfg\['Servers'\]\[\$i\]\['AllowNoPassword'\] = FALSE;/g" /etc/phpmyadmin/config.inc.php && \
+    echo "\$cfg['Servers'][\$i]['controluser'] = 'phpmyadmin';\n\
+\$cfg['Servers'][\$i]['controlpass'] = 'phpmyadmin_pass';\n\
+\$cfg['Servers'][\$i]['adminer'] = 'root';\n\
+\$cfg['Servers'][\$i]['auth_type'] = 'cookie';" >> /etc/phpmyadmin/config.inc.php
 
 # Set working directory
 WORKDIR /var/www/html
