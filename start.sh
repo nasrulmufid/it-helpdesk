@@ -6,7 +6,7 @@ echo "🚀 Starting IT Help Desk v2.2.0..."
 # Wait for MySQL to be ready
 echo "⏳ Waiting for MySQL to be ready..."
 timeout=60
-while ! mysqladmin ping -h mysql -u root -proot_pass_2024_secure --silent; do
+while ! mysqladmin ping -h mysql -u root -proot_pass_2024_secure --silent --skip-ssl; do
     timeout=$((timeout - 1))
     if [ $timeout -eq 0 ]; then
         echo "❌ MySQL is not responding after 60 seconds"
@@ -30,14 +30,20 @@ mkdir -p /var/www/html/storage/logs
 mkdir -p /var/www/html/storage/framework/{cache,sessions,views}
 mkdir -p /var/www/html/bootstrap/cache
 
+# Regenerate autoloader for production (no-dev) to remove dev package references
+echo "📦 Regenerating autoloader..."
+composer dump-autoload --optimize --no-dev --no-scripts 2>/dev/null || true
+
 # Generate application key if not exists
 if [ -z "$APP_KEY" ]; then
     echo "🔑 Generating application key..."
     php artisan key:generate --force
 fi
 
-# Clear and cache configurations
+# Clear all cached files and regenerate package discovery
 echo "⚡ Optimizing Laravel configuration..."
+rm -f bootstrap/cache/packages.php bootstrap/cache/services.php bootstrap/cache/config.php bootstrap/cache/routes-v7.php
+php artisan package:discover || true
 php artisan config:cache || true
 php artisan route:cache || true
 php artisan view:cache || true
